@@ -18,15 +18,15 @@ Backend engineers waste time writing brittle glue code between APIs, databases, 
 - **Strongly Typed**: Compile-time type checking with inference
 - **Explicit I/O**: All side effects (HTTP, File) are clearly marked
 - **Sync-First**: V1 is synchronous—async comes later
-- **Predictable Execution**: No hidden magic; desugaring is transparent and consistent.
+- **Predictable Execution**: No hidden magic; desugaring is transparent and consistent
 
 ---
 
 ## ⚙️ Architecture
 
-**Implementation**: Python 3.11+
-**Parser**: ANTLR4 (grammar-driven)
-**Execution**: Tree-walking interpreter (V1)
+**Implementation**: Python 3.11+  
+**Parser**: ANTLR4 (grammar-driven)  
+**Execution**: Tree-walking interpreter (V1)  
 **Type System**: Static with Local Type Inference (Bidirectional)
 
 ```
@@ -94,7 +94,7 @@ Concurrency and performance optimizations.
 
 ```bash
 # Clone and install
-git clone [https://github.com/yourusername/streamlang.git](https://github.com/yourusername/streamlang.git)
+git clone https://github.com/yourusername/streamlang.git
 cd streamlang
 pip install -r requirements.txt
 
@@ -103,6 +103,7 @@ python -m streamlang repl
 
 # Execute a file
 python -m streamlang run examples/hello.sl
+```
 
 ---
 
@@ -110,22 +111,40 @@ python -m streamlang run examples/hello.sl
 
 ```
 streamlang/
+├── README.md                      # You are here
+├── CHANGELOG.md                   # Version history
+├── LICENSE                        # MIT License
+├── CONTRIBUTING.md                # Contribution guidelines
+├── requirements.txt               # Python dependencies
 ├── grammar/
-│   └── StreamLang.g4              # ANTLR grammar
+│   └── StreamLang.g4              # ANTLR grammar definition
 ├── streamlang/
-│   ├── parser/                    # Generated parsers
-│   ├── ast/                       # AST nodes
-│   ├── typechecker/               # Type inference
-│   ├── interpreter/               # Tree-walker
-│   ├── stdlib/                    # Built-ins
-│   └── cli/                       # REPL + CLI
-├── tests/                         # Unit/integration tests
+│   ├── parser/                    # Generated ANTLR parsers
+│   ├── ast/                       # AST node definitions
+│   ├── typechecker/               # Type inference engine
+│   ├── interpreter/               # Tree-walking interpreter
+│   ├── stdlib/                    # Built-in functions
+│   └── cli/                       # REPL + CLI entry points
+├── tests/                         # Unit and integration tests
 ├── examples/                      # Sample .sl programs
 └── docs/
-    ├── architecture/              # System design
-    ├── v1_specifications/         # V1 scope
-    └── language_reference/        # Syntax + stdlib
+    ├── v1_specifications/         # V1 implementation details
+    │   ├── 01_V1_Scope.md
+    │   ├── 02_Language_Syntax.md
+    │   ├── 03_Std_Lib.md
+    │   └── 04_Architecture.md
+    └── future_ideas/              # Post-v1.0 concepts
+        ├── Async_Event_Loop.md
+        ├── LSP_Extension.md
+        └── Native_HTTP_Client.md
 ```
+
+**Documentation Links:**
+- [V1 Scope](docs/v1_specifications/01_V1_Scope.md) - What's in/out for v0.1
+- [Language Syntax](docs/v1_specifications/02_Language_Syntax.md) - Grammar + examples  
+- [Standard Library](docs/v1_specifications/03_Std_Lib.md) - Built-in functions
+- [Architecture](docs/v1_specifications/04_Architecture.md) - System design
+- [Future Ideas](docs/future_ideas/) - Post-v1.0 concepts
 
 ---
 
@@ -133,23 +152,23 @@ streamlang/
 
 | Document | Purpose |
 |----------|---------|
-| [01_V1_Scope.md](docs/v1_specifications/01_V1_Scope.md) | What's in/out for v0.1 |
-| [02_Language_Syntax.md](docs/v1_specifications/02_Language_Syntax.md) | Grammar + examples |
-| [03_Std_Lib.md](docs/v1_specifications/03_Std_Lib.md) | Standard Library |
-| [04_Architecture.md](docs/v1_specifications/04_Architecture.md) | System Architecture |
+| [`01_V1_Scope.md`](docs/v1_specifications/01_V1_Scope.md) | What's in/out for v0.1 |
+| [`02_Language_Syntax.md`](docs/v1_specifications/02_Language_Syntax.md) | Grammar + examples |
+| [`03_Std_Lib.md`](docs/v1_specifications/03_Std_Lib.md) | Standard Library reference |
+| [`04_Architecture.md`](docs/v1_specifications/04_Architecture.md) | System architecture |
 
 ---
 
 ## 🧪 Running Tests
 
 ```bash
-# All tests
+# Run all tests
 pytest tests/
 
-# With coverage
+# Run with coverage report
 pytest --cov=streamlang tests/
 
-# Type check
+# Type check the codebase
 mypy streamlang/
 ```
 
@@ -158,11 +177,27 @@ mypy streamlang/
 ## 🤝 Contributing
 
 Active development. Contributions welcome after v0.1 stabilizes.
-Current Focus: Completing v0.1 interpreter.
-See CONTRIBUTING.md for guidelines.
+
+**Current Focus**: Completing v0.1 interpreter.
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for guidelines.
 
 ---
 
 ## 📄 License
 
-MIT - See LICENSE
+MIT - See [`LICENSE`](LICENSE) file for details.
+
+---
+
+## 🔗 Links
+
+- **Documentation**: [`docs/`](docs/)
+- **Issue Tracker**: `github.com/yourusername/streamlang/issues`
+- **Discussions**: `github.com/yourusername/streamlang/discussions`
+
+---
+
+**Version**: v0.1-dev  
+**Status**: Pre-alpha  
+**Last Updated**: December 2025
