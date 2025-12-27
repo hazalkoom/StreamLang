@@ -43,7 +43,6 @@ Backend engineers waste time writing brittle glue code between APIs, databases, 
                                                     └──────────┘
 ```
 
-See [`docs/architecture/`](docs/architecture/) for component design.
 
 ---
 
@@ -193,8 +192,8 @@ MIT - See [`LICENSE`](LICENSE) file for details.
 ## 🔗 Links
 
 - **Documentation**: [`docs/`](docs/)
-- **Issue Tracker**: `github.com/yourusername/streamlang/issues`
-- **Discussions**: `github.com/yourusername/streamlang/discussions`
+- **Issue Tracker**: `github.com/hazalkoom/streamlang/issues`
+- **Discussions**: `github.com/hazalkoom/streamlang/discussions`
 
 ---
 
