@@ -59,14 +59,14 @@ class BinaryExpr(Expr):
 @dataclass
 class UnaryExpr(Expr):
     op: str
-    opperand: Expr
+    operand: Expr
 
 @dataclass
 class FunctionCall(Expr):
     func_name: str
     args: list[Expr]
 
-dataclass
+@dataclass
 class IfExpr(Expr):
     condition: Expr
     then_block: 'Block'

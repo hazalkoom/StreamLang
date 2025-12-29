@@ -1,0 +1,10 @@
+// sandbox.stream
+function square(x: Int) -> Int {
+    x * x
+}
+
+let num = 43
+let result = num |> square
+
+print("Hello from a real file!")
+print("Square of 43 is:", result)

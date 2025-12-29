@@ -1,0 +1,12 @@
+function add(a: Int, b: Int) -> Int { a + b }
+function double(x: Int) -> Int { x * 2 }
+function square(x: Int) -> Int { x * x }
+
+let start = 10
+
+// 10 + 5 = 15
+// 15 * 2 = 30
+// 30 * 30 = 900
+let res = start |> add(5) |> double |> square
+
+print("Pipeline Result:", res)

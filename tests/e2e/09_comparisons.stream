@@ -1,0 +1,5 @@
+// EXPECT: true
+let x = 10
+let y = 20
+// (10 != 20) AND (10 <= 10) AND (20 >= 10)
+print(x != y && x <= 10 && y >= x)

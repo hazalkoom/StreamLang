@@ -1,0 +1,13 @@
+let age = 20
+let status = "Unknown"
+
+if age >= 18 {
+    let status = "Adult"
+    print(status)
+} else {
+    let status = "Minor"
+    print(status)
+}
+
+// Global status should still be Unknown (Scope Check)
+print("Global status:", status)

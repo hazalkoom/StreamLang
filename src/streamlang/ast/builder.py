@@ -121,6 +121,12 @@ class ASTBuilder(StreamLangVisitor):
             op=ctx.getChild(1).getText(),
             right=self.visit(ctx.expr(1))
         )
+    
+    def visitUnaryMinusExpr(self, ctx: StreamLangParser.UnaryMinusExprContext):
+        return nodes.UnaryExpr('-', self.visit(ctx.expr()))
+
+    def visitNotExpr(self, ctx: StreamLangParser.NotExprContext):
+        return nodes.UnaryExpr('!', self.visit(ctx.expr()))
 
     def visitMulDivModExpr(self, ctx: StreamLangParser.MulDivModExprContext):
         return nodes.BinaryExpr(
@@ -172,3 +178,10 @@ class ASTBuilder(StreamLangVisitor):
         
         else:
             raise Exception("Syntax Error: Pipe operator must flow into a Function Call or Identifier.")
+        
+    
+    def visitIfElseExpr(self, ctx: StreamLangParser.IfElseExprContext):
+        condition = self.visit(ctx.expr())
+        then_block = self.visit(ctx.block(0))
+        else_block = self.visit(ctx.block(1))
+        return nodes.IfExpr(condition, then_block, else_block)

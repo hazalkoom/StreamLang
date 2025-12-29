@@ -63,12 +63,21 @@ class Interpreter:
         self.visit(node.expr)
 
     def visit_Block(self, node: nodes.Block):
-        # Execute all statements
-        for stmt in node.statements:
-            self.visit(stmt)
-        # Return the final expression value (if any)
-        if node.return_expr:
-            return self.visit(node.return_expr)
+        # 1. SCOPE ENTRY: Save current env, create new child env
+        previous_env = self.current_env
+        self.current_env = Environment(parent=previous_env)
+
+        try:
+            # 2. Execute all statements in this new scope
+            for stmt in node.statements:
+                self.visit(stmt)
+            
+            # 3. Handle return expression
+            if node.return_expr:
+                return self.visit(node.return_expr)
+        finally:
+            # 4. SCOPE EXIT: Restore the original environment
+            self.current_env = previous_env
 
 
     # EXPRESSIONS
@@ -107,11 +116,30 @@ class Interpreter:
         
         raise Exception(f"Unknown operator {node.op}")
 
+    def visit_UnaryExpr(self, node: nodes.UnaryExpr):
+        val = self.visit(node.operand)
+        
+        if node.op == '-':
+            return -val
+        if node.op == '!':
+            return not val
+            
+        raise Exception(f"Runtime Error: Unknown unary operator {node.op}")
+
     def visit_FunctionCall(self, node: nodes.FunctionCall):
         # 1. Check for Standard Library calls
         if node.func_name == 'print':
             args = [self.visit(arg) for arg in node.args]
-            print(*args)
+            
+            # Formatting: Convert Python 'True' to StreamLang 'true'
+            formatted_args = []
+            for arg in args:
+                if isinstance(arg, bool):
+                    formatted_args.append(str(arg).lower())
+                else:
+                    formatted_args.append(arg)
+            
+            print(*formatted_args)
             return None
 
         # 2. Look for user-defined function
@@ -142,3 +170,11 @@ class Interpreter:
         self.current_env = previous_env
         
         return result
+    
+    def visit_IfExpr(self, node: nodes.IfExpr):
+        condition_result = self.visit(node.condition)
+        
+        if condition_result:
+            return self.visit(node.then_block)
+        else:
+            return self.visit(node.else_block)

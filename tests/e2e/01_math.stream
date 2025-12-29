@@ -1,0 +1,5 @@
+// EXPECT: 50
+let a = 10
+let b = 20
+let c = (a + b) * 2 - 10
+print(c)

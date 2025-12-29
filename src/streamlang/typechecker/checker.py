@@ -22,9 +22,9 @@ class TypeChecker:
     def error(self, message: str):
         self.errors.append(f"Type Error: {message}")
 
-    # =========================================================================
+
     # VISITOR METHODS
-    # =========================================================================
+
 
     def visit_Program(self, node: nodes.Program):
         for decl in node.declarations:
@@ -70,9 +70,9 @@ class TypeChecker:
     def visit_ExprStmt(self, node: nodes.ExprStmt):
         self.visit(node.expr)
 
-    # =========================================================================
+
     # EXPRESSIONS (Must return a TypeAnnotation)
-    # =========================================================================
+
 
     def visit_IntLit(self, node: nodes.IntLit):
         return nodes.TypeAnnotation("Int")
@@ -124,6 +124,42 @@ class TypeChecker:
             return nodes.TypeAnnotation("Bool")
             
         return nodes.TypeAnnotation("Unknown")
+    
+    def visit_UnaryExpr(self, node: nodes.UnaryExpr):
+        type_obj = self.visit(node.operand)
+        
+        if node.op == '-':
+            if type_obj.name != 'Int':
+                self.error(f"Cannot use '-' on type {type_obj.name}")
+            return type_obj
+            
+        if node.op == '!':
+            if type_obj.name != 'Bool':
+                self.error(f"Cannot use '!' on type {type_obj.name}")
+            return type_obj
+            
+        return type_obj
+
+    def visit_IfExpr(self, node: nodes.IfExpr):
+        # 1. Check Condition (Must be Bool)
+        cond_type = self.visit(node.condition)
+        if cond_type.name != "Bool":
+            self.error(f"If condition must be Bool, got {cond_type}")
+
+        # 2. Check Both Branches
+        then_type = self.visit(node.then_block)
+        else_type = self.visit(node.else_block)
+
+        # 3. Handle Void/None types (if a block is empty)
+        then_name = then_type.name if then_type else "Void"
+        else_name = else_type.name if else_type else "Void"
+
+        # 4. Ensure branches match
+        if then_name != else_name:
+            self.error(f"If branches must return same type. Got {then_name} and {else_name}")
+            return nodes.TypeAnnotation("Unknown")
+            
+        return then_type
 
     def visit_FunctionCall(self, node: nodes.FunctionCall):
         # In a real compiler, we would look up the function definition and check args.

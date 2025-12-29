@@ -1,0 +1,10 @@
+function fact(n: Int) -> Int {
+    if n <= 1 { 
+        1 
+    } else { 
+        n * fact(n - 1) 
+    }
+}
+
+let result = fact(5)
+print("Factorial of 5 is:", result)

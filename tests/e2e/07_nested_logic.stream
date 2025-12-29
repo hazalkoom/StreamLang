@@ -1,0 +1,11 @@
+// EXPECT: B
+let x = 10
+if x > 20 {
+    print("A")
+} else {
+    if x == 10 {
+        print("B")
+    } else {
+        print("C")
+    }
+}

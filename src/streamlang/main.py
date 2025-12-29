@@ -41,19 +41,27 @@ def run(source_code: str):
     print("✅ Done.")
 
 if __name__ == '__main__':
-    # Test Code
-    code = """
-    function add(a: Int, b: Int) -> Int {
-        a + b
-    }
-
-    let x = 10
-    let y = 20
-    
-    // Test Pipe Operator!
-    let result = x |> add(y) 
-
-    print("Result is:", result)
-    """
-    
-    run(code)
+    # Check if the user provided a filename
+    if len(sys.argv) > 1:
+        # User ran: python -m src.streamlang.main sandbox.stream
+        filename = sys.argv[1]
+        try:
+            with open(filename, 'r') as f:
+                code = f.read()
+            print(f"📂 Reading file: {filename}...")
+            run(code)
+        except FileNotFoundError:
+            print(f"❌ Error: Could not find file '{filename}'")
+    else:
+        # Default Mode: Run the hardcoded test string
+        print("⚠️ No file provided. Running default test code.")
+        
+        code = """
+        function add(a: Int, b: Int) -> Int {
+            a + b
+        }
+        let x = 10
+        let result = x |> add(20)
+        print("Default Test Result:", result)
+        """
+        run(code)
