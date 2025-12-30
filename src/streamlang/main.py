@@ -7,61 +7,54 @@ from streamlang.typechecker.checker import TypeChecker
 from streamlang.interpreter.interpreter import Interpreter
 
 def run(source_code: str):
-    # 1. Lexing (Text -> Tokens)
+    # 1. Lexing
     input_stream = InputStream(source_code)
     lexer = StreamLangLexer(input_stream)
     stream = CommonTokenStream(lexer)
 
-    # 2. Parsing (Tokens -> Parse Tree)
+    # 2. Parsing
     parser = StreamLangParser(stream)
     tree = parser.program()
 
     if parser.getNumberOfSyntaxErrors() > 0:
         print("❌ Syntax Error: Giving up.")
-        return
+        sys.exit(1)
 
-    # 3. AST Building (Parse Tree -> AST)
+    # 3. AST Building
     builder = ASTBuilder()
     ast = builder.visit(tree)
 
-    # 4. Type Checking (Analysis)
+    # 4. Type Checking
     checker = TypeChecker()
     errors = checker.check(ast)
     if errors:
         for e in errors:
             print(f"❌ {e}")
-        return
+        sys.exit(1)
 
-    # 5. Execution (Run!)
+    # 5. Execution
     print("🚀 Running StreamLang...")
-    print("--------------------------------")
-    interpreter = Interpreter()
-    interpreter.interpret(ast)
-    print("--------------------------------")
-    print("✅ Done.")
+    print("-" * 32)
+    
+    try:
+        interpreter = Interpreter()
+        interpreter.interpret(ast)
+        print("-" * 32)
+        print("✅ Done.")
+    except Exception as e:
+        print("-" * 32)
+        print(f"🔥 CRASH: {e}")
+        sys.exit(1)
 
 if __name__ == '__main__':
-    # Check if the user provided a filename
     if len(sys.argv) > 1:
-        # User ran: python -m src.streamlang.main sandbox.stream
         filename = sys.argv[1]
         try:
             with open(filename, 'r') as f:
                 code = f.read()
-            print(f"📂 Reading file: {filename}...")
             run(code)
         except FileNotFoundError:
             print(f"❌ Error: Could not find file '{filename}'")
+            sys.exit(1)
     else:
-        # Default Mode: Run the hardcoded test string
-        print("⚠️ No file provided. Running default test code.")
-        
-        code = """
-        function add(a: Int, b: Int) -> Int {
-            a + b
-        }
-        let x = 10
-        let result = x |> add(20)
-        print("Default Test Result:", result)
-        """
-        run(code)
+        print("⚠️ No file provided.")

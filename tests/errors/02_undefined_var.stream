@@ -1,0 +1,3 @@
+// ERROR: Undefined variable 'ghost'
+let x = 10
+print(ghost)

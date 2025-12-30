@@ -23,10 +23,7 @@ class Interpreter:
         self.functions: Dict[str, nodes.FunctionDecl] = {}
 
     def interpret(self, node: nodes.ASTNode):
-        try:
-            return self.visit(node)
-        except Exception as e:
-            print(f"🔥 CRASH: {e}")
+        return self.visit(node)
 
     def visit(self, node: nodes.ASTNode):
         method_name = f'visit_{type(node).__name__}'

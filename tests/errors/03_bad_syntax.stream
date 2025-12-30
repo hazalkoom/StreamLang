@@ -1,0 +1,4 @@
+// ERROR: Syntax Error
+if true {
+    print("Hello")
+// Missing '}' here

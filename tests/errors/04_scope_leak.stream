@@ -1,0 +1,5 @@
+// ERROR: Undefined variable 'secret'
+if true {
+    let secret = 999
+}
+print(secret)
