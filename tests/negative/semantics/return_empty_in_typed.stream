@@ -1,0 +1,4 @@
+// EXPECT: Error
+function lie() -> Int {
+    return; // Error: Return type mismatch
+}

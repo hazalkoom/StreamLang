@@ -1,0 +1,5 @@
+// EXPECT: Runtime Error
+// false || (CRASH) -> Should Crash
+if false || (1 / 0 == 0) {
+    print("Should not be here");
+}

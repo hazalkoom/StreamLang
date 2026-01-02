@@ -1,0 +1,4 @@
+// EXPECT: Syntax Error
+function bad(a, b) { // Missing types
+    return a + b;
+}

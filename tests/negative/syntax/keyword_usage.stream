@@ -1,0 +1,2 @@
+// EXPECT: Syntax Error
+let while = 10;

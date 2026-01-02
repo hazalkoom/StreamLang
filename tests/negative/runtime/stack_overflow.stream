@@ -1,0 +1,5 @@
+// EXPECT: Runtime Error
+function forever(n: Int) -> Int {
+    return forever(n + 1);
+}
+forever(1);

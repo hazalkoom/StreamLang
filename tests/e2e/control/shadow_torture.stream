@@ -1,0 +1,11 @@
+// EXPECT: 99 2 1
+let x = 1;
+if true {
+    let x = 2;
+    if true {
+        let x = 99;
+        print(x); // 99
+    }
+    print(x); // 2 (Should return to middle scope)
+}
+print(x); // 1 (Should return to global scope)

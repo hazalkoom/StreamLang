@@ -1,0 +1,4 @@
+// EXPECT: Error
+if 123 { // Error: 123 is Int, not Bool
+    print("Bad");
+}

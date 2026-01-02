@@ -1,0 +1,4 @@
+// EXPECT: ERROR
+let x = 10;
+// This should crash the compiler because 'let' is immutable
+x = 20;

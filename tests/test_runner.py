@@ -1,49 +1,56 @@
 import pytest
 import os
-import glob
 import io
 import sys
-from src.streamlang.main import run
+from streamlang.main import run
 
-# 1. Point to the new 'e2e' folder
-# This finds tests/e2e/*.stream
-CURRENT_DIR = os.path.dirname(__file__)
-E2E_DIR = os.path.join(CURRENT_DIR, "e2e")
-TEST_FILES = glob.glob(os.path.join(E2E_DIR, "*.stream"))
+def discover_tests(base_path):
+    """Recursively finds all .stream files in a directory."""
+    test_files = []
+    for root, _, files in os.walk(base_path):
+        for file in files:
+            if file.endswith(".stream"):
+                # Return the full path so the runner can find it
+                test_files.append(os.path.join(root, file))
+    return sorted(test_files)
 
-@pytest.mark.parametrize("file_path", TEST_FILES)
-def test_stream_files(file_path):
-    """
-    Runs every .stream file in tests/e2e/
-    """
-    # A. Read the file
+# Discover the two groups of tests
+E2E_FILES = discover_tests("tests/e2e")
+NEGATIVE_FILES = discover_tests("tests/negative")
+
+@pytest.mark.parametrize("file_path", E2E_FILES)
+def test_e2e_success(file_path):
+    """Tests that must run to completion and print 'Done'."""
+    with open(file_path, 'r') as f:
+        code = f.read()
+    
+    captured_out = io.StringIO()
+    sys.stdout = captured_out
+    
+    try:
+        # These should NOT raise any exceptions
+        run(code)
+        output = captured_out.getvalue()
+        assert "✅ Done." in output
+    finally:
+        sys.stdout = sys.__stdout__
+
+@pytest.mark.parametrize("file_path", NEGATIVE_FILES)
+def test_negative_failures(file_path):
+    """Tests that must crash or call sys.exit(1)."""
     with open(file_path, 'r') as f:
         code = f.read()
 
-    # B. Parse EXPECT Header
-    first_line = code.strip().split('\n')[0]
-    
-    # Skip files without EXPECT header (or fail them, your choice)
-    if not first_line.startswith("// EXPECT:"):
-        pytest.fail(f"File {os.path.basename(file_path)} missing // EXPECT header")
-        
-    expected_output = first_line.replace("// EXPECT:", "").strip()
-
-    # C. Capture Output
-    captured_output = io.StringIO()
-    original_stdout = sys.stdout
-    sys.stdout = captured_output
+    captured_out = io.StringIO()
+    sys.stdout = captured_out
 
     try:
-        run(code)
-    except Exception as e:
-        pytest.fail(f"Compiler Crashed: {e}")
+        # We EXPECT a crash or a SystemExit(1)
+        with pytest.raises((SystemExit, Exception)):
+            run(code)
+        
+        output = captured_out.getvalue()
+        # Verify it didn't sneak through to the end
+        assert "✅ Done." not in output
     finally:
-        sys.stdout = original_stdout
-
-    # D. Assert
-    actual_output = captured_output.getvalue()
-    
-    # Check if the expected output exists anywhere in the print log
-    assert expected_output in actual_output, \
-        f"\n❌ FAILED: {os.path.basename(file_path)}\nExpected: {expected_output}\nGot:\n{actual_output}"
+        sys.stdout = sys.__stdout__

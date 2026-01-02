@@ -1,0 +1,10 @@
+// EXPECT: Runtime Error
+function ping(n: Int) -> Int {
+    return pong(n + 1);
+}
+
+function pong(n: Int) -> Int {
+    return ping(n + 1);
+}
+
+ping(0);

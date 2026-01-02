@@ -14,7 +14,10 @@ declaration
     ;
 
 // Function Definition
-functionDecl : FN ID '(' paramList? ')' '->' type block ;
+// Format: function name(arg: type) -> type { body }
+functionDecl 
+    : FN ID '(' paramList? ')' '->' type block 
+    ;
 
 paramList
     : param (',' param)*
@@ -32,17 +35,58 @@ type
 // Statements
 statement
     : varDecl
+    | assignStmt
+    | ifExpr        
+    | whileStmt
+    | breakStmt
+    | forStmt
+    | block
+    | returnStmt    
     | exprStmt
     ;
 
-// MISSING RULE 1: Variable Declaration
-varDecl
-    : 'let' ID '=' expr
+
+ifExpr
+    : IF expr block (ELSE block)?
     ;
 
-// MISSING RULE 2: Expression Statement
+// NEW: Top-level rule for Return
+returnStmt
+    : 'return' expr? ';'
+    ;
+
+breakStmt
+    : BREAK ';'
+    ;
+
+// Variable Declaration
+// Covers: let x = 10; OR var y = 20;
+varDecl
+    : (LET | VAR) ID '=' expr ';'
+    ;
+
+// Assignment Statement
+// Covers: x = x + 1;
+assignStmt
+    : ID '=' expr ';'
+    ;
+
+// Expression Statement
+// Covers: print("hello");
 exprStmt
-    : expr
+    : expr ';'
+    ;
+
+// While Loop
+// Covers: while (x < 10) { ... }
+whileStmt
+    : WHILE '(' expr ')' block
+    ;
+
+// For Loop
+// Covers: for (var i = 0; i < 10; i = i + 1) { ... }
+forStmt
+    : FOR '(' (varDecl | assignStmt | ';') expr? ';' (assignStmt | expr)? ')' block
     ;
 
 block
@@ -52,7 +96,7 @@ block
 // Expressions
 expr
     : '(' expr ')'                              # ParenExpr
-    | expr '(' argList? ')'                     # FunctionCallExpr
+    | ID '(' argList? ')'                       # FunctionCallExpr
     | '-' expr                                  # UnaryMinusExpr
     | '!' expr                                  # NotExpr
     | expr ('*'|'/'|'%') expr                   # MulDivModExpr
@@ -62,7 +106,7 @@ expr
     | expr '&&' expr                            # LogicalAndExpr
     | expr '||' expr                            # LogicalOrExpr
     | expr '|>' expr                            # PipeExpr
-    | 'if' expr block 'else' block              # IfElseExpr
+    | ifExpr                                    # IfExprAlt  // Uses the shared rule
     | INT                                       # IntLit
     | STRING                                    # StringLit
     | (TRUE | FALSE)                            # BoolLit
@@ -84,8 +128,12 @@ exprList
 
 FN      : 'function';
 LET     : 'let';
+VAR     : 'var';
 IF      : 'if';
 ELSE    : 'else';
+WHILE   : 'while';
+FOR     : 'for';
+BREAK   : 'break';
 TRUE    : 'true';
 FALSE   : 'false';
 
@@ -97,6 +145,7 @@ LBRACK  : '[';
 RBRACK  : ']';
 COMMA   : ',';
 COLON   : ':';
+SEMI    : ';';
 ARROW   : '->';
 ASSIGN  : '=';
 

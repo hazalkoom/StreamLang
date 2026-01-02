@@ -1,0 +1,8 @@
+// EXPECT: 100
+function add(a: Int, b: Int) -> Int { a + b }
+function double(x: Int) -> Int { x * 2 }
+function square(x: Int) -> Int { x * x }
+
+// 5 + 5 = 10 -> double(10) = 20 -> square(20) = 400 ... wait;
+// Let's do: 5 -> add(5) [10] -> double [20] -> add(80) [100]
+print(5 |> add(5) |> double |> add(80));

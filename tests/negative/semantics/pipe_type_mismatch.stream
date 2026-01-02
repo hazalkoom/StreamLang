@@ -1,0 +1,5 @@
+// EXPECT: Error
+function eatInt(n: Int) -> Int { return n; }
+
+// Error: "Hello" is String, eatInt wants Int
+"Hello" |> eatInt;

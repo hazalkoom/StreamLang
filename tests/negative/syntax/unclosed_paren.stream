@@ -1,0 +1,2 @@
+// EXPECT: Syntax Error
+print(10; // Missing ')'

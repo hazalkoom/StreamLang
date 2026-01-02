@@ -1,0 +1,10 @@
+// EXPECT: 0 1 2 Done
+var i = 0;
+while (true) {
+    if i == 3 {
+        break;
+    }
+    print(i);
+    i = i + 1;
+}
+print("Done");

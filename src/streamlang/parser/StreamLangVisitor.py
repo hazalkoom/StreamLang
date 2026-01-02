@@ -1,4 +1,4 @@
-# Generated from grammar/StreamLang.g4 by ANTLR 4.13.2
+# Generated from StreamLang.g4 by ANTLR 4.13.2
 from antlr4 import *
 if "." in __name__:
     from .StreamLangParser import StreamLangParser
@@ -49,13 +49,43 @@ class StreamLangVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by StreamLangParser#ifExpr.
+    def visitIfExpr(self, ctx:StreamLangParser.IfExprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by StreamLangParser#returnStmt.
+    def visitReturnStmt(self, ctx:StreamLangParser.ReturnStmtContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by StreamLangParser#breakStmt.
+    def visitBreakStmt(self, ctx:StreamLangParser.BreakStmtContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by StreamLangParser#varDecl.
     def visitVarDecl(self, ctx:StreamLangParser.VarDeclContext):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by StreamLangParser#assignStmt.
+    def visitAssignStmt(self, ctx:StreamLangParser.AssignStmtContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by StreamLangParser#exprStmt.
     def visitExprStmt(self, ctx:StreamLangParser.ExprStmtContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by StreamLangParser#whileStmt.
+    def visitWhileStmt(self, ctx:StreamLangParser.WhileStmtContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by StreamLangParser#forStmt.
+    def visitForStmt(self, ctx:StreamLangParser.ForStmtContext):
         return self.visitChildren(ctx)
 
 
@@ -94,13 +124,13 @@ class StreamLangVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by StreamLangParser#EqualityExpr.
-    def visitEqualityExpr(self, ctx:StreamLangParser.EqualityExprContext):
+    # Visit a parse tree produced by StreamLangParser#FunctionCallExpr.
+    def visitFunctionCallExpr(self, ctx:StreamLangParser.FunctionCallExprContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by StreamLangParser#FunctionCallExpr.
-    def visitFunctionCallExpr(self, ctx:StreamLangParser.FunctionCallExprContext):
+    # Visit a parse tree produced by StreamLangParser#EqualityExpr.
+    def visitEqualityExpr(self, ctx:StreamLangParser.EqualityExprContext):
         return self.visitChildren(ctx)
 
 
@@ -111,6 +141,11 @@ class StreamLangVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by StreamLangParser#PipeExpr.
     def visitPipeExpr(self, ctx:StreamLangParser.PipeExprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by StreamLangParser#IfExprAlt.
+    def visitIfExprAlt(self, ctx:StreamLangParser.IfExprAltContext):
         return self.visitChildren(ctx)
 
 
@@ -131,11 +166,6 @@ class StreamLangVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by StreamLangParser#AddSubExpr.
     def visitAddSubExpr(self, ctx:StreamLangParser.AddSubExprContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by StreamLangParser#IfElseExpr.
-    def visitIfElseExpr(self, ctx:StreamLangParser.IfElseExprContext):
         return self.visitChildren(ctx)
 
 

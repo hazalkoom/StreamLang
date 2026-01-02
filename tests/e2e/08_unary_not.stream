@@ -1,5 +1,0 @@
-// EXPECT: true
-let a = true
-let b = false
-// !false is true, !!true is true
-print(!b && !!a)

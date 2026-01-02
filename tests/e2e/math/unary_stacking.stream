@@ -1,0 +1,7 @@
+// EXPECT: true -10
+// !!true is true
+print(!!true);
+// -(-10) is 10, then -10 is -10. 
+// Wait, your parser might parse - -10 as (-)-10. 
+// Let's test standard stacking: -(-10)
+print(-(-10));

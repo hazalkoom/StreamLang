@@ -1,0 +1,4 @@
+// EXPECT: Error
+function bad(a: Int, a: Int) -> Int { // Error: 'a' already defined
+    return a;
+}

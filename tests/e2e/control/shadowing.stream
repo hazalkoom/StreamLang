@@ -1,0 +1,7 @@
+let x = 10;
+if true {
+    let x = 99;
+    print(x);
+} else {
+    print("This never runs");
+}

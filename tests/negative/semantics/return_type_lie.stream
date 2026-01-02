@@ -1,0 +1,5 @@
+// EXPECT: Error
+function fake() -> Int {
+    return true; // ERROR: Type mismatch
+}
+fake();

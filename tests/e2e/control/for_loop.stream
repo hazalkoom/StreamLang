@@ -1,0 +1,5 @@
+// EXPECT: 0 2 4
+// Notice the semicolon inside the parentheses: k = k + 2;
+for (var k = 0; k <= 4; k = k + 2;) {
+    print(k);
+}

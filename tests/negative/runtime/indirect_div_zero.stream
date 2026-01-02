@@ -1,0 +1,4 @@
+// EXPECT: Runtime Error
+var x = 5;
+var y = 5;
+print(100 / (x - y)); // 100 / 0

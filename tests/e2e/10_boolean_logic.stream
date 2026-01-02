@@ -1,5 +1,0 @@
-// EXPECT: false
-let t = true
-let f = false
-// (true OR false) AND (false) -> true AND false -> false
-print((t || f) && f)

@@ -1,0 +1,2 @@
+// EXPECT: Runtime Error
+print(10 / 0);

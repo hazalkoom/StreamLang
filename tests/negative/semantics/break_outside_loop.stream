@@ -1,0 +1,3 @@
+// EXPECT: Error
+print("This is fine");
+break; // ERROR: Cannot break at top level

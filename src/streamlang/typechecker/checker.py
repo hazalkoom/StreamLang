@@ -1,178 +1,187 @@
+from contextlib import contextmanager
 from streamlang.ast import nodes
 from streamlang.typechecker.symbols import SymbolTable
 
 class TypeChecker:
     def __init__(self):
-        self.scope = SymbolTable()  # Global scope
+        self.scope = SymbolTable()
         self.errors = []
+        self.current_return_type = None 
 
     def check(self, node: nodes.ASTNode):
-        """Entry point for checking the AST."""
         self.visit(node)
         return self.errors
 
     def visit(self, node: nodes.ASTNode):
-        method_name = f'visit_{type(node).__name__}'
-        visitor = getattr(self, method_name, self.generic_visit)
-        return visitor(node)
+        if not node: return None
+        return getattr(self, f'visit_{type(node).__name__}', self.generic_visit)(node)
 
     def generic_visit(self, node):
         raise Exception(f"No visit_{type(node).__name__} method defined")
 
-    def error(self, message: str):
-        self.errors.append(f"Type Error: {message}")
+    def error(self, msg: str):
+        self.errors.append(f"Type Error: {msg}")
 
+    @contextmanager
+    def scoped(self):
+        prev, self.scope = self.scope, SymbolTable(parent=self.scope)
+        try: yield
+        finally: self.scope = prev
 
-    # VISITOR METHODS
-
+    # =========================================================================
+    # VISITORS
+    # =========================================================================
 
     def visit_Program(self, node: nodes.Program):
-        for decl in node.declarations:
-            self.visit(decl)
+        for decl in node.declarations: self.visit(decl)
 
     def visit_FunctionDecl(self, node: nodes.FunctionDecl):
-        # 1. Define function in current scope (so it can be called recursively)
-        # Note: In V1 we treat function names as variables with special types? 
-        # Actually, for V1 simplicity, we just won't type-check the *call* to the function itself strictly yet,
-        # but we MUST enter a new scope for the body.
+        param_types = [p.param_type for p in node.params]
+        self.scope.define(node.name, node.return_type, is_mutable=False, params=param_types)
         
-        self.scope.define(node.name, node.return_type)
+        prev_return = self.current_return_type
+        self.current_return_type = node.return_type
 
-        # 2. Create new scope for function body
-        previous_scope = self.scope
-        self.scope = SymbolTable(parent=previous_scope)
+        with self.scoped():
+            for param in node.params:
+                self.scope.define(param.name, param.param_type, is_mutable=False)
+            self.visit(node.body)
 
-        # 3. Define parameters in the local scope
-        for param in node.params:
-            self.scope.define(param.name, param.param_type)
-
-        # 4. Check the body
-        self.visit(node.body)
-
-        # 5. Restore scope
-        self.scope = previous_scope
+        self.current_return_type = prev_return
 
     def visit_Block(self, node: nodes.Block):
-        for stmt in node.statements:
-            self.visit(stmt)
-        
-        if node.return_expr:
-            return self.visit(node.return_expr)
+        with self.scoped():
+            last_type = nodes.TypeAnnotation("Unit")
+            for stmt in node.statements:
+                if res := self.visit(stmt): last_type = res
+            
+            if node.return_expr:
+                last_type = self.visit(node.return_expr)
+            return last_type
 
     def visit_VarDecl(self, node: nodes.VarDecl):
-        # Infer type from the initializer expression
-        inferred_type = self.visit(node.initializer)
+        inferred = self.visit(node.initializer)
+        self.scope.define(node.name, inferred, is_mutable=node.is_mutable)
+        return inferred
+
+    def visit_AssignStmt(self, node: nodes.AssignStmt):
+        if not (symbol := self.scope.resolve(node.name)):
+            return self.error(f"Undefined variable '{node.name}'")
+        if not symbol.is_mutable:
+            return self.error(f"Cannot assign to immutable '{node.name}'.")
         
-        # Save it to the symbol table
-        self.scope.define(node.name, inferred_type)
-        return inferred_type
+        if (val_type := self.visit(node.value)).name != symbol.type.name:
+            self.error(f"Type Mismatch: {val_type} cannot be assigned to {symbol.type}")
 
-    def visit_ExprStmt(self, node: nodes.ExprStmt):
-        self.visit(node.expr)
+    def visit_ExprStmt(self, node: nodes.ExprStmt): self.visit(node.expr)
+    
+    def visit_ReturnStmt(self, node: nodes.ReturnStmt):
+        val_type = self.visit(node.value) if node.value else nodes.TypeAnnotation("Unit")
+        
+        if self.current_return_type:
+            expected = self.current_return_type.name
+            actual = val_type.name
+            if expected != actual:
+                self.error(f"Return type mismatch: Expected {expected}, got {actual}")
 
+        return nodes.TypeAnnotation("Unit")
 
-    # EXPRESSIONS (Must return a TypeAnnotation)
+    def visit_BreakStmt(self, node: nodes.BreakStmt): return nodes.TypeAnnotation("Unit")
 
+    def visit_WhileStmt(self, node: nodes.WhileStmt):
+        if self.visit(node.condition).name != "Bool":
+            self.error("While condition must be Bool")
+        self.visit(node.body)
 
-    def visit_IntLit(self, node: nodes.IntLit):
-        return nodes.TypeAnnotation("Int")
+    def visit_ForStmt(self, node: nodes.ForStmt):
+        with self.scoped():
+            if node.initializer: self.visit(node.initializer)
+            if node.condition and self.visit(node.condition).name != "Bool":
+                self.error("For condition must be Bool")
+            if node.step: self.visit(node.step)
+            self.visit(node.body)
 
-    def visit_StringLit(self, node: nodes.StringLit):
-        return nodes.TypeAnnotation("String")
+    # =========================================================================
+    # EXPRESSIONS
+    # =========================================================================
 
-    def visit_BoolLit(self, node: nodes.BoolLit):
-        return nodes.TypeAnnotation("Bool")
+    def visit_IntLit(self, _): return nodes.TypeAnnotation("Int")
+    def visit_StringLit(self, _): return nodes.TypeAnnotation("String")
+    def visit_BoolLit(self, _): return nodes.TypeAnnotation("Bool")
 
     def visit_ListLit(self, node: nodes.ListLit):
-        # Assume homogeneous lists (all elements same type)
-        if not node.elements:
-            # Empty list generic problem... default to List<Any> or Error?
-            # For V1, let's say List<Int> default for now or error.
-            return nodes.TypeAnnotation("List", nodes.TypeAnnotation("Int"))
-            
-        first_type = self.visit(node.elements[0])
+        if not node.elements: return nodes.TypeAnnotation("List", nodes.TypeAnnotation("Int"))
+        first = self.visit(node.elements[0])
         for e in node.elements[1:]:
-            this_type = self.visit(e)
-            if this_type.name != first_type.name:
-                self.error(f"List elements must be same type. Found {first_type} and {this_type}")
-        
-        return nodes.TypeAnnotation("List", first_type)
+            if self.visit(e).name != first.name:
+                self.error("List elements must be same type")
+        return nodes.TypeAnnotation("List", first)
 
     def visit_VarRef(self, node: nodes.VarRef):
-        symbol = self.scope.resolve(node.name)
-        if not symbol:
-            self.error(f"Undefined variable '{node.name}'")
-            return nodes.TypeAnnotation("Unknown")
-        return symbol.type
+        if symbol := self.scope.resolve(node.name): return symbol.type
+        self.error(f"Undefined variable '{node.name}'")
+        return nodes.TypeAnnotation("Unknown")
 
     def visit_BinaryExpr(self, node: nodes.BinaryExpr):
-        left_type = self.visit(node.left)
-        right_type = self.visit(node.right)
+        left, right = self.visit(node.left), self.visit(node.right)
+        
+        # FIX: Allow String concatenation
+        if node.op == '+':
+            if left.name == 'Int' and right.name == 'Int': return nodes.TypeAnnotation("Int")
+            if left.name == 'String' and right.name == 'String': return nodes.TypeAnnotation("String")
+            self.error(f"Operator '+' requires Ints or Strings, got {left.name} and {right.name}")
+            return nodes.TypeAnnotation("Int")
 
-        # Math Logic
-        if node.op in ['+', '-', '*', '/', '%']:
-            if left_type.name == 'Int' and right_type.name == 'Int':
-                return nodes.TypeAnnotation("Int")
-            else:
-                self.error(f"Operator '{node.op}' requires Ints, got {left_type} and {right_type}")
-                return nodes.TypeAnnotation("Int") # Return dummy to prevent cascade
+        if node.op in {'-', '*', '/', '%'}:
+            if left.name == 'Int' and right.name == 'Int': return nodes.TypeAnnotation("Int")
+            self.error(f"Operator '{node.op}' requires Ints")
+            return nodes.TypeAnnotation("Int")
 
-        # Comparison Logic
-        if node.op in ['<', '>', '<=', '>=', '==', '!=']:
-            if left_type.name != right_type.name:
-                self.error(f"Cannot compare {left_type} with {right_type}")
+        if node.op in {'<', '>', '<=', '>=', '==', '!='}:
+            if left.name != right.name: self.error("Type mismatch in comparison")
             return nodes.TypeAnnotation("Bool")
             
-        return nodes.TypeAnnotation("Unknown")
-    
-    def visit_UnaryExpr(self, node: nodes.UnaryExpr):
-        type_obj = self.visit(node.operand)
+        if node.op in {'&&', '||'}:
+            if left.name == 'Bool' and right.name == 'Bool': return nodes.TypeAnnotation("Bool")
+            self.error("Logic operators require Bools")
         
-        if node.op == '-':
-            if type_obj.name != 'Int':
-                self.error(f"Cannot use '-' on type {type_obj.name}")
-            return type_obj
-            
-        if node.op == '!':
-            if type_obj.name != 'Bool':
-                self.error(f"Cannot use '!' on type {type_obj.name}")
-            return type_obj
-            
-        return type_obj
+        return nodes.TypeAnnotation("Bool")
+
+    def visit_UnaryExpr(self, node: nodes.UnaryExpr):
+        op_type = self.visit(node.operand)
+        if node.op == '-' and op_type.name != 'Int': self.error("Unary '-' requires Int")
+        if node.op == '!' and op_type.name != 'Bool': self.error("Unary '!' requires Bool")
+        return op_type
 
     def visit_IfExpr(self, node: nodes.IfExpr):
-        # 1. Check Condition (Must be Bool)
-        cond_type = self.visit(node.condition)
-        if cond_type.name != "Bool":
-            self.error(f"If condition must be Bool, got {cond_type}")
+        if self.visit(node.condition).name != "Bool": self.error("If condition must be Bool")
+        
+        then_t = self.visit(node.then_block)
+        else_t = self.visit(node.else_block) if node.else_block else None
+        
+        t_name = then_t.name if then_t else "Unit"
+        e_name = else_t.name if else_t else "Unit"
 
-        # 2. Check Both Branches
-        then_type = self.visit(node.then_block)
-        else_type = self.visit(node.else_block)
-
-        # 3. Handle Void/None types (if a block is empty)
-        then_name = then_type.name if then_type else "Void"
-        else_name = else_type.name if else_type else "Void"
-
-        # 4. Ensure branches match
-        if then_name != else_name:
-            self.error(f"If branches must return same type. Got {then_name} and {else_name}")
+        if t_name != e_name:
+            self.error(f"If branches mismatch: {t_name} vs {e_name}")
             return nodes.TypeAnnotation("Unknown")
-            
-        return then_type
+        return then_t
 
     def visit_FunctionCall(self, node: nodes.FunctionCall):
-        # In a real compiler, we would look up the function definition and check args.
-        # For V1 MVP, we will assume standard library functions exist.
-        
-        # Hardcoded StdLib checks for now (Refactor later!)
-        if node.func_name == "print":
-            return nodes.TypeAnnotation("Unit")
+        arg_types = [self.visit(arg) for arg in node.args]
+
+        if node.func_name == "print": return nodes.TypeAnnotation("Unit")
         
         symbol = self.scope.resolve(node.func_name)
         if not symbol:
-            # We assume it's a global function we haven't checked or stdlib
-            # In V2 we fix this. For now, trust the user or return Unknown.
             return nodes.TypeAnnotation("Unknown")
-            
+        
+        if symbol.params is not None:
+            if len(arg_types) != len(symbol.params):
+                self.error(f"Function '{node.func_name}' expects {len(symbol.params)} args, got {len(arg_types)}")
+            else:
+                for i, (arg_t, param_t) in enumerate(zip(arg_types, symbol.params)):
+                    if arg_t.name != param_t.name:
+                        self.error(f"Argument {i+1} mismatch: Expected {param_t}, got {arg_t}")
+
         return symbol.type

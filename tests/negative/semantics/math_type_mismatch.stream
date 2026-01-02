@@ -1,0 +1,2 @@
+// EXPECT: Error
+print(10 + true); // Error: Operator '+' requires Ints

@@ -1,0 +1,15 @@
+// EXPECT: Good
+function trigger() -> Bool {
+    print("BAD");
+    return true;
+}
+
+// false && trigger() should NOT call trigger()
+if false && trigger() {
+    print("This shouldn't run");
+}
+
+// true || trigger() should NOT call trigger()
+if true || trigger() {
+    print("Good");
+}

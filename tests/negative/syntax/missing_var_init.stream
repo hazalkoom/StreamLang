@@ -1,0 +1,2 @@
+// EXPECT: Syntax Error
+var x; // Missing '= value'
