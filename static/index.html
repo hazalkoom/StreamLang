@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamLang Playground</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+    <link rel="icon" href="icon.png" type="image/png">
+</head>
+<body>
+    <div class="background-blobs"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>
+                <img src="icon.png" alt="Logo" style="width: 50px; height: 50px; vertical-align: middle;"> 
+                StreamLang
+            </h1>
+            <p class="tagline">The Pipe-Forward Language for Modern Engineers</p>
+        </div>
+
+        <div class="glass-panel">
+            <div class="panel-header">
+                <i class="fas fa-code"></i> INPUT STREAM
+            </div>
+            <textarea id="code" spellcheck="false" placeholder="// Write your logic here...
+10 |> add(5) |> print;">10 |> add(5) |> print;</textarea>
+        </div>
+
+        <div class="control-bar">
+            <button id="runBtn">
+                <i class="fas fa-play"></i> EXECUTE
+            </button>
+        </div>
+
+        <div class="glass-panel output-panel">
+            <div class="panel-header">
+                <i class="fas fa-terminal"></i> STDOUT
+            </div>
+            <div id="output">Waiting for signal...</div>
+            <div class="status-bar">
+                <span class="dot"></span> System Ready
+            </div>
+        </div>
+
+        <div class="footer">
+            Running on StreamLang Engine v1.0 • Deployed on Hugging Face
+        </div>
+    </div>
+</body>
+</html>
