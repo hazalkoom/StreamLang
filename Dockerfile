@@ -7,6 +7,9 @@ RUN useradd -m -u 1000 user
 # 3. Set working directory
 WORKDIR /app
 
+# Ensure the working directory is writable by the non-root user
+RUN chown -R user:user /app
+
 # 4. Copy project files
 COPY pyproject.toml .
 COPY src/ src/
@@ -15,11 +18,15 @@ COPY src/ src/
 COPY --chown=user ./static /app/static
 
 # 6. Install dependencies
+RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir .
 RUN pip install --no-cache-dir fastapi uvicorn requests
 
 # 7. Copy the API entry point
 COPY api.py .
+
+ # Ensure all app files are readable by the non-root user at runtime
+ RUN chown -R user:user /app
 
 # 8. Switch to the non-root user
 USER user

@@ -1,6 +1,6 @@
 ---
 title: StreamLang Playground
-emoji: 🚀
+emoji: "🚀"
 colorFrom: purple
 colorTo: blue
 sdk: docker
@@ -9,4 +9,3 @@ pinned: false
 ---
 
 # StreamLang Playground
-A custom programming language built from scratch in Python.
